@@ -139,7 +139,7 @@ def genetic_algorithm(population,
                 raise ValueError("Método inválido. Use 'proportional' ou 'tournament'.")
 
             # Geração do filho e possível mutação
-            child = reproduce_pick_better(parents)
+            child = reproduce_pick_better(parents, rho)
             if np.random.random() < taxa_mutacao:
                 child = random_genetic_mutation_plus(child)
             
