@@ -24,7 +24,8 @@ def genetic_algorithm(population,
                       n_tournament=10, 
                       rho=3, 
                       elite_size=0, 
-                      limite_abate=None):
+                      limite_abate=0,
+                      tentativas_abate=100):
     
     # Calcula os pesos com base na função de fitness (aptidão), que mede o quão bom é um indivíduo (ou solução) da população
     def weighted_by(population, fitness):
@@ -114,11 +115,11 @@ def genetic_algorithm(population,
 
         # Número de tentativas para encontrar uma solução com o abate
         attempts = 0
-        max_attempts = len(population) # Limite de tentativas para evitar loops infinitos
+        max_attempts = tentativas_abate # Limite de tentativas para evitar loops infinitos
         
         # Elitismo: preserva os melhores indivíduos
         if elite_size > 0:
-            sorted_population = sorted(population, key=lambda x: fitness(x),reverse=True)
+            sorted_population = sorted(population, key = lambda x: fitness(x), reverse = True)
             elite = sorted_population[:elite_size]
         else:
             elite = []
@@ -127,40 +128,33 @@ def genetic_algorithm(population,
         population2 = []
     
         
-        while len(population2) + elite_size < len(population) and attempts < max_attempts:
-            if limite_abate is not None:
-                attempts += 1
+        while len(population2) + elite_size < len(population):
             
             # Seleciona os pais de acordo com o método de seleção escolhido
             if selection_method == 'proportional':
-                parent1, parent2 = weighted_random_choices(population, weights, 2)
+                parents = weighted_random_choices(population, weights, rho)
             elif selection_method == 'tournament':
-                parent1, parent2 = tournament_selection(population, fitness, n_tournament, rho)
+                parents = tournament_selection(population, fitness, n_tournament, rho)
             else:
                 raise ValueError("Método inválido. Use 'proportional' ou 'tournament'.")
 
             # Geração do filho e possível mutação
-            child = reproduce_pick_better(parent1, parent2)
+            child = reproduce_pick_better(parents)
             if np.random.random() < taxa_mutacao:
                 child = random_genetic_mutation_plus(child)
             
-
             # Faz o abate de indivíduos com base no limite de abate
-            if limite_abate is None or fitness(child) >= limite_abate:
+            if fitness(child) >= limite_abate or attempts >= max_attempts:
                 population2.append(child)
-
-
-        # Caso o número de descendentes seja menor que o tamanho da população, preenche com aleatórios
-        while len(population2) + len(elite) < len(population):
-            random_individual = np.random.randint(1, 9, 8)
-            if limite_abate is None or fitness(random_individual) >= limite_abate:
-                population2.append(random_individual)
+            
+            elif limite_abate > 0:
+                    attempts += 1
 
         # Combina os descendentes com os elites
-        population = elite + population2[:len(population) - len(elite)]
+        population = elite + population2
 
         # Ordena nova população por fitness
-        population = sorted(population, key=fitness)
+        population = sorted(population, key=lambda x: fitness(x))
 
         # Critério de parada: encontrou solução ou atingiu limite de gerações
         if fitness(population[-1]) == 28 or step == stepL:
