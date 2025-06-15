@@ -66,9 +66,9 @@ def genetic_algorithm(population,
         else:
             c = np.random.randint(1, n)
             children = [np.array(list(parents[0][:c]) + list(parents[1][c:])),
-                        np.array(list(parents[1][:c]) + list(parent1[0][c:])),
-                        np.array(list(parent1[0][:n//2]) + list(parent2[1][n//2:])),
-                        np.array(list(parent2[1][:n//2]) + list(parent1[0][n//2:]))]
+                        np.array(list(parents[1][:c]) + list(parents[0][c:])),
+                        np.array(list(parents[0][:n//2]) + list(parents[1][n//2:])),
+                        np.array(list(parents[1][:n//2]) + list(parents[0][n//2:]))]
         children.sort(key=lambda x: eight_queens_heuristic(x))
         return children[0]
 
