@@ -14,20 +14,6 @@ def eight_queens_heuristic(state):
                 h += 1
     return h
 
-def four_queens_heuristic(state):
-    h = 0
-    for i in range(4):
-        for j in range(i + 1, 4):
-            if state[i] == state[j]:
-                h += 1
-                continue
-            if state[i] == state[j] + (j - i):
-                h += 1
-                continue
-            if state[i] == state[j] - (j - i):
-                h += 1
-    return h
-
 def genetic_algorithm(population, fitness, stepL = 100):
 
     def weighted_by(population, fitness):
@@ -36,11 +22,6 @@ def genetic_algorithm(population, fitness, stepL = 100):
     def weighted_random_choices(population, weights, n):
         return [population[i] for i in np.random.choice(len(population), n, p = (weights)/np.sum(weights))]
     
-    def reproduce(parent1, parent2):
-        n = len(parent1)
-        c = np.random.randint(1, n)
-        return np.array(list(parent1[:c]) + list(parent2[c:]))
-    
     def reproduce_pick_better(parent1, parent2):
         n = len(parent1)
         c = np.random.randint(1, n)
@@ -48,75 +29,13 @@ def genetic_algorithm(population, fitness, stepL = 100):
         child_2 = np.array(list(parent2[:c]) + list(parent1[c:]))
         return child_1 if eight_queens_heuristic(child_1) <= eight_queens_heuristic(child_2) else child_2
     
-    def genetic_mutation(parent):
-        n = len(parent)//2
-        for i in range(n):
-            parent[i] = np.random.randint(1, 9)
-        return parent
-
-    def genetic_mutation_plus(parent):
-        n = len(parent)
-        for i in range(n - 2):
-            parent[i] = np.random.randint(1, 9)
-        return parent
-    
-    def genetic_mutation_less(parent):
-        n = len(parent)
-        for i in range(n - 6):
-            parent[i] = np.random.randint(1, 9)
-        return parent
-    
-    def random_genetic_mutation(parent):
-        n = len(parent)//2
-        genes = np.random.choice(len(parent), n)
-        for i in genes:
-            parent[i] = np.random.randint(1, 9)
-        return parent
-    
     def random_genetic_mutation_plus(parent):
         n = len(parent)
         genes = np.random.choice(len(parent), n - 2)
         for i in genes:
             parent[i] = np.random.randint(1, 9)
         return parent
-    
-    def random_genetic_mutation_less(parent):
-        n = len(parent)
-        genes = np.random.choice(len(parent), n - 6)
-        for i in genes:
-            parent[i] = np.random.randint(1, 9)
-        return parent
-    
-    def reproduce_in_vitro(parent1, parent2):
-        if four_queens_heuristic(parent1[:4]) <= four_queens_heuristic(parent1[4:]):
-            var = genetic_mutation(parent1[:4])
-            if four_queens_heuristic(var) < four_queens_heuristic(parent1[:4]):
-                embrio = np.array(list(var) + list(parent2[4:]))
-            embrio = np.array(list(parent1[:4]) + list(parent2[4:]))
-        else:
-            embrio = np.array(list(parent2[:4]) + list(parent1[4:]))
-        return embrio
-    
-    def reproduce_with_help(parent1, parent2, surrogate):
-        parents = sorted([parent1, parent2, surrogate], key = lambda x: eight_queens_heuristic(x))
-        embrio = reproduce_pick_better(parents[0], parents[1])
-        embrio[0] = parents[-1][0]
-        embrio[-1] = parents[-1][-1]
-        return embrio
-    
-    def reproduce_mamma_mia(parent1, parent2, parent3):
-        n = len(parent1)//3 + 1
-        c = np.random.randint(1, n)
-        d = np.random.randint(1, n)
-        return np.array(list(parent1[:c]) + list(parent2[c:d + c]) + list(parent3[d + c:]))
-    
-    def mutate(child):
-        n = len(child)
-        c = np.random.randint(0, n)
-        child[c] = np.random.randint(1, np.random.randint(2, 9))
-        #child[n - c - 1] = np.random.randint(np.random.randint(1, 8), 9)
-        return child
-    
+
     step = 0
     while True:
         step += 1
